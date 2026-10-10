@@ -37,4 +37,4 @@ py -3 ios/tools/prepare_icon.py --exe "<原版游戏目录>/th11.exe" --group ID
 
 将源码以及 `.local/assets/`、`.local/app-icon/Assets.xcassets/` 复制到 Mac 的同一项目目录后，按 [README.md](README.md) 构建。不要复制或提交连接配置、SSH 密钥或其他私有工具链。
 
-原版资源、字体和图标的准备输出不得随公开源码发布，仓库的忽略规则和源码打包工具均排除这些文件。
+原版资源、字体和完整 AppIcon 构建目录的准备输出保留在本地，仓库的忽略规则和源码打包工具均排除这些文件。供 README 展示的 `docs/app-icon.png` 是唯一收录的图标预览，来源见 [ICON.md](ICON.md)。

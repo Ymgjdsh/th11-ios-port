@@ -1,4 +1,4 @@
-"""Export native sources and build tools; exclude private resources and machines."""
+"""Export native sources, tools and documentation; exclude private build inputs."""
 import argparse
 from pathlib import Path
 import tarfile
@@ -13,6 +13,7 @@ ALLOWED = {'.c', '.cpp', '.h', '.hpp', '.inc', '.mm', '.m', '.py', '.sh',
 EXTRA_FILES = (
     'README.md', '.gitignore', '.gitattributes',
     'LICENSE-launcher.txt', 'THIRD-PARTY-NOTICES.txt',
+    'docs/app-icon.png',
     'th11_web/scripts/prepare-fonts.mjs',
     'th11_web/scripts/native/font-oracle.mjs',
     'th11_web/scripts/package.json', 'th11_web/scripts/package-lock.json',
@@ -44,7 +45,7 @@ def main():
     with tarfile.open(args.output, 'w:gz', format=tarfile.PAX_FORMAT) as archive:
         for path in files:
             archive.add(path, arcname=path.relative_to(ROOT).as_posix(), recursive=False)
-    print(f'Packaged {len(files)} source files; assets and local configuration excluded')
+    print(f'Packaged {len(files)} source/documentation files; private assets and local configuration excluded')
 
 
 if __name__ == '__main__':

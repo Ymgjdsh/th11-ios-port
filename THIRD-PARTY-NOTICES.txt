@@ -26,5 +26,11 @@ Native iOS source export (b3):
 - Koffi 3.2.1: MIT; Windows offline font preparation only, installed from
   npm using th11_web/scripts/package-lock.json, not embedded in the app.
 
-Game data, music, Windows fonts, original icons, executable files and user
-saves/replays are private local inputs and are not part of this repository.
+Documentation icon: docs/app-icon.png is a 180 x 180 preview of the app icon,
+derived from th11.exe resource IDI_ICON3. Original artwork: Team Shanghai
+Alice / ZUN. This preview is included for README display; prepare the full
+AppIcon build catalog locally using ios/tools/prepare_icon.py.
+
+Game data, music, Windows fonts, the full AppIcon build catalog, executable
+files and user saves/replays are private local inputs and are not part of
+this repository.

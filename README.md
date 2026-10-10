@@ -1,8 +1,18 @@
+<p align="center">
+  <img src="docs/app-icon.png" alt="TH11 iOS 应用图标" width="180" height="180">
+</p>
+
 # TH11 iOS Port
 
 《東方地霊殿 ～ Subterranean Animism》1.00a 的原生 iOS 移植，基于 [YomotsuHisami/th11](https://github.com/YomotsuHisami/th11) 的 C++ 行为重建源码，使用 UIKit、SDL3 和 OpenGL ES 3。
 
 本仓库保存 b3 版本的主要源码、资源准备工具、构建脚本与原生测试。游戏逻辑在设备上直接执行 C++；原版 Windows 程序只作为本地资源准备的输入。游戏内容为日文，触控设置为简体中文。
+
+## Vibe Coding 声明
+
+本项目的 iOS 移植采用 **Vibe Coding（AI 辅助开发）**：由用户提出需求，使用 **OpenAI Codex** 辅助完成移植实现、触控与设置功能、问题修复、构建验证及文档整理。
+
+游戏的 C++ 行为重建源码来自 [YomotsuHisami/th11](https://github.com/YomotsuHisami/th11)，原作及图标来自 Team Shanghai Alice / ZUN；各来源的署名与组件授权均保留。测试覆盖与尚未验证的内容见下方“验证与已知限制”及 [ios/VALIDATION.md](ios/VALIDATION.md)。
 
 ## 功能
 
@@ -36,7 +46,7 @@ cd th11-ios-port
 
 ### 私有资源
 
-从自己有权使用的日文 **TH11 1.00a** 安装准备 `th11.exe`、`th11.dat` 和 `thbgm.dat`。游戏数据、音乐、字体和图标不在仓库中。
+从自己有权使用的日文 **TH11 1.00a** 安装准备 `th11.exe`、`th11.dat` 和 `thbgm.dat`。游戏数据、音乐、字体和用于构建的完整图标目录需在本地准备；仓库中的 `docs/app-icon.png` 仅用于 README 展示。
 
 在 Windows 的仓库根目录运行：
 
@@ -117,6 +127,8 @@ TH11 的 Bomb 消耗火力，因此开发者菜单中的 Bomb 能量通过补满
 
 ## 资源与授权
 
-本仓库不包含原版 EXE、游戏数据、音乐、字体、图标、存档、录像、IPA 或私有工具链。可运行的安装包需从有权使用的资源在本地构建。
+本仓库收录一张用于 README 展示的应用图标预览 `docs/app-icon.png`，与 IPA 使用的图标一致，源自原版 `th11.exe` 的 `IDI_ICON3` 资源，原图版权归 Team Shanghai Alice / ZUN。
+
+原版 EXE、游戏数据、音乐、字体、完整 AppIcon 构建目录、存档、录像、IPA 和私有工具链均在本地准备。可运行的安装包需从有权使用的资源在本地构建。
 
 授权按组件保留，不对整个项目或原版资源声明统一许可证。上游的 `LICENSE-launcher.txt` 针对网页启动器；该启动器未收录到本原生仓库，不能据此推定全部游戏重建源码的授权。第三方声明见 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt)、[ios/licenses](ios/licenses) 与 `portable/sdl/third_party` 中各组件的原始声明。

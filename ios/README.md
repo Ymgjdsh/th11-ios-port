@@ -62,6 +62,6 @@ TH11_SDK=iphonesimulator TH11_DIAGNOSTICS=ON \
 python3 ios/tools/package_source.py --output dist/TH11-native-source.tar.gz
 ```
 
-只导出原生源码、字体准备脚本、文档和组件授权说明，排除游戏资源、图标、依赖安装目录、编译输出和本机配置。
+导出原生源码、字体准备脚本、文档、组件授权说明，以及供 README 展示的 `docs/app-icon.png`。游戏资源、完整 AppIcon 构建目录、依赖安装目录、编译输出和本机配置仍由本地准备。
 
-资源、图标和私有构建输入只供用户本地安装；不能公开上传。源码及验证范围见 VALIDATION.md。
+私有构建输入保留在本地。文档图标的来源见 [ICON.md](ICON.md)，源码及验证范围见 [VALIDATION.md](VALIDATION.md)。
