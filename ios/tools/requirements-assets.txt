@@ -1,0 +1,5 @@
+# Resource preparation only; these packages are not embedded in the iOS app.
+numpy>=1.26,<3
+soundfile>=0.13.1,<1
+Pillow>=10,<13
+pefile==2024.8.26

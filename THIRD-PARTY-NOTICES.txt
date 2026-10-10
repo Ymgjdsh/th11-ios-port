@@ -1,0 +1,27 @@
+Original game and assets: Team Shanghai Alice / ZUN.
+Launcher: YomotsuHisami/eagler-touhou, GPL-3.0-or-later, adapted from the local final TH08/TH10/TH09 launcher. See LICENSE-launcher.txt.
+SDL3: zlib. Emscripten: MIT / University of Illinois-NCSA.
+
+Native iOS source export (b2):
+- Based on YomotsuHisami/th11, reference commit
+  8255f484d0c1cff0ef9af9f19bb159328adda69f:
+  https://github.com/YomotsuHisami/th11
+  The upstream launcher GPL notice above is retained for provenance. The
+  browser launcher and Emscripten toolchain are not included in this export;
+  LICENSE-launcher.txt does not assert a blanket license over the game
+  reconstruction, native additions, original game or original assets.
+- SDL 3.4.2: zlib; ios/licenses/SDL.txt.
+- SDL_ttf 3.2.2 / FreeType: retained dependency toolchain notices in
+  ios/licenses/SDL_ttf.txt and ios/licenses/FreeType.txt. The native target
+  links SDL3 and uses offline raster fonts, not SDL_ttf.
+- miniaudio: choice of public domain / MIT-0; original notice at
+  portable/sdl/third_party/miniaudio.LICENSE and in miniaudio.h.
+- stb_image / stb_vorbis: choice of MIT / public domain; full original
+  notices remain in their respective headers under portable/sdl/third_party.
+- Shared touch policy: adapted from eagler-th07 Touch.cpp (CC0), credited
+  in portable/input/TouchController.hpp.
+- Koffi 3.2.1: MIT; Windows offline font preparation only, installed from
+  npm using th11_web/scripts/package-lock.json, not embedded in the app.
+
+Game data, music, Windows fonts, original icons, executable files and user
+saves/replays are private local inputs and are not part of this repository.

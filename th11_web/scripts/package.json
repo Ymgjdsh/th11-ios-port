@@ -1,0 +1,16 @@
+{
+  "name": "th11-ios-font-tools",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline Windows GDI font preparation for the native TH11 iOS port",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "fonts": "node prepare-fonts.mjs"
+  },
+  "devDependencies": {
+    "koffi": "3.2.1"
+  }
+}
