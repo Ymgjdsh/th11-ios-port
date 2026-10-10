@@ -15,6 +15,8 @@
 设置中的“拖拽限速”默认开启，遵循原版各角色的速度；关闭后立即跟随相对拖动。不限速拖拽不会再被灵梦＋文的加速重复放大，也不会生成文的速度残影，僚机随角色同步平移。
 打开“开发者功能”后，自己的战斗中显示可拖动的“开发”按钮，横竖屏位置分别保存。点开后游戏暂停，可切换无敌、最高分数、补满资源、满火力、满残机与 Bomb 能量、全部补满及清除弹幕和激光。TH11 的 Bomb 消耗火力。关闭开发者功能会关闭无敌；回放及演示不启用作弊。
 设置 → 开发者与解锁 → 输入作弊码，输入 ymgjdsh 并确认，永久解锁六种角色／搭档的 Extra、四个难度下的全部练习关卡，以及 Music Room 的全部 17 首曲目。输入错误或取消不会解锁。保留既有成绩，重启和恢复触控默认设置不会撤销解锁。
+“自动 Bomb”默认关闭，开启后在实际碰撞造成中弹、死亡效果出现之前使用原作 Bomb，按当前角色的正常火力消耗扣费。擦弹、无敌、已有 Bomb、对话、回放及演示不触发；火力不足则正常受击。河城荷取的护盾会吸收触发自动 Bomb 的这次碰撞，沿用原作的护盾消耗和效果。
+SDL 3.4.2 的字体通知处理会误抢原生输入框的焦点；构建工具自动应用 ios/tools/patch_sdl_uikit.py，限定只处理 SDL 自己的输入框变化。作弊码支持连续输入、删除、粘贴后确认。
 成绩、设置、录像写入应用沙盒。诊断日志保存在本机，可以在设置内使用系统分享导出。
 
 ## 本地构建
@@ -27,10 +29,10 @@
 ```sh
 bash ios/tools/fetch_dependencies.sh
 bash ios/tools/native_checks.sh
-TH11_SDK=iphoneos TH11_DIAGNOSTICS=OFF TH11_BUILD_NUMBER=2 bash ios/build_ios.sh
+TH11_SDK=iphoneos TH11_DIAGNOSTICS=OFF TH11_BUILD_NUMBER=3 bash ios/build_ios.sh
 python3 ios/tools/package_ipa.py \
   .local/build-iphoneos/RelWithDebInfo-iphoneos/th11.app \
-  dist/TH11-iOS14-Native-b2.ipa
+  dist/TH11-iOS14-Native-b3.ipa
 ```
 
 依赖脚本固定 SDL 3.4.2，并获取旧工具链配套的 SDL_ttf 3.2.2 / FreeType；本原生目标实际链接 SDL3，字体由离线栅格数据提供。
@@ -52,7 +54,7 @@ TH11_SDK=iphonesimulator TH11_DIAGNOSTICS=ON \
   TH11_BUILD_DIR="$PWD/.local/build-simulator-diagnostics" bash ios/build_ios.sh
 ```
 
-诊断版本用于模拟器自动操作，不作为设备安装包。显示、触控和性能的验证范围见 [VALIDATION.md](VALIDATION.md) 与 [PERFORMANCE.md](PERFORMANCE.md)。战斗作弊动作未记录进录像，使用作弊后生成的录像可能无法复现该局。
+诊断版本用于模拟器自动操作，不作为设备安装包。显示、触控和性能的验证范围见 [VALIDATION.md](VALIDATION.md) 与 [PERFORMANCE.md](PERFORMANCE.md)。战斗作弊动作及自动 Bomb 触发未记录进录像，使用这些功能后生成的录像可能无法复现该局。
 
 ## 源码导出
 

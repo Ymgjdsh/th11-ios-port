@@ -2,7 +2,7 @@
 
 《東方地霊殿 ～ Subterranean Animism》1.00a 的原生 iOS 移植，基于 [YomotsuHisami/th11](https://github.com/YomotsuHisami/th11) 的 C++ 行为重建源码，使用 UIKit、SDL3 和 OpenGL ES 3。
 
-本仓库保存 b2 版本的主要源码、资源准备工具、构建脚本与原生测试。游戏逻辑在设备上直接执行 C++；原版 Windows 程序只作为本地资源准备的输入。游戏内容为日文，触控设置为简体中文。
+本仓库保存 b3 版本的主要源码、资源准备工具、构建脚本与原生测试。游戏逻辑在设备上直接执行 C++；原版 Windows 程序只作为本地资源准备的输入。游戏内容为日文，触控设置为简体中文。
 
 ## 功能
 
@@ -14,6 +14,8 @@
 - **拖拽限速开关**：默认遵循原作移动速度；关闭后立即跟随相对拖拽。修复灵梦＋文的重复位移、移动残影和僚机动画位置重叠。
 - **开发者功能开关**：战斗中显示可拖动悬浮按钮，提供无敌、最高分数、资源补满、满火力、满残机与 Bomb 能量、全部补满，以及清除弹幕和激光。
 - **一键解锁**：设置 → 开发者与解锁 → 输入作弊码，输入 `ymgjdsh` 并确认，永久解锁六条 Extra 路线、全部练习关卡与 Music Room 的 17 首曲目；保留已有成绩。
+- **自动 Bomb 开关**：默认关闭；实际中弹时在死亡效果之前释放原作 Bomb，扣除对应角色一次 Bomb 的火力。擦弹、无敌、Bomb 已生效、对话和回放不触发，火力不足时正常受击。
+- 修复作弊码输入首个字符后键盘自动收回的问题，支持连续输入、删除和粘贴。构建时自动为 SDL 3.4.2 应用限定输入来源的 UIKit 修补。
 - 30 / 60 FPS 显示选项，游戏逻辑目标保持 60 Hz；设置、成绩及录像保存在应用沙盒，本机诊断日志可通过系统分享导出。
 
 ## 构建
@@ -55,10 +57,10 @@ py -3 ios/tools/prepare_icon.py --exe "<原版游戏目录>/th11.exe" --group ID
 ```sh
 bash ios/tools/fetch_dependencies.sh
 bash ios/tools/native_checks.sh
-TH11_SDK=iphoneos TH11_DIAGNOSTICS=OFF TH11_BUILD_NUMBER=2 bash ios/build_ios.sh
+TH11_SDK=iphoneos TH11_DIAGNOSTICS=OFF TH11_BUILD_NUMBER=3 bash ios/build_ios.sh
 python3 ios/tools/package_ipa.py \
   .local/build-iphoneos/RelWithDebInfo-iphoneos/th11.app \
-  dist/TH11-iOS14-Native-b2.ipa
+  dist/TH11-iOS14-Native-b3.ipa
 ```
 
 `TH11_BUILD_JOBS` 设置编译并发数，默认 3；`TH11_BUILD_DIR`、`TH11_ASSETS`、`TH11_DEPENDENCIES` 和 `TH11_BUILD_NUMBER` 可覆盖默认值。模拟器构建及检查入口见 [ios/README.md](ios/README.md)。
@@ -103,7 +105,7 @@ TH11 的 Bomb 消耗火力，因此开发者菜单中的 Bomb 能量通过补满
 
 - **尚未完成 iOS 14 真机安装与性能验收**；最低部署版本及模拟器结果不能证明真机所有场景稳定 60 FPS。
 - 行为重建和固定样本检查不等于原版 EXE 的所有行为完全一致。
-- 战斗作弊动作没有记录进录像，使用作弊后生成的录像可能无法复现该局。
+- 战斗作弊动作及自动 Bomb 触发没有记录进录像，使用这些功能后生成的录像可能无法复现该局；回放不根据当前开关自动补触发。
 - 游戏资源为日文，未附加 TH11 汉化补丁。
 
 ## 致谢

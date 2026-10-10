@@ -36,6 +36,7 @@ struct sigaction originalSignalActions[5]{};
 std::uint64_t observedCallbacks=0;
 void startSettingsSmoke();
 void startFeaturesSmoke();
+void startKeyboardSmoke();
 #endif
 
 void writeAll(int fd,const void* bytes,size_t length){
@@ -215,6 +216,7 @@ void diagnosticsStart(){
 #if TH11_DIAGNOSTICS
     if([NSProcessInfo.processInfo.arguments containsObject:@"--settings-smoke"])startSettingsSmoke();
     if([NSProcessInfo.processInfo.arguments containsObject:@"--features-smoke"])startFeaturesSmoke();
+    if([NSProcessInfo.processInfo.arguments containsObject:@"--keyboard-smoke"])startKeyboardSmoke();
 #endif
 }
 void diagnosticsState(NSString* reason){
@@ -271,7 +273,7 @@ void diagnosticsFrame(double timestamp,double workSeconds,std::uint64_t callback
 @implementation TH11SettingsController
 - (NSArray*)rows {
  return @[
- @[@[@"movement",@"移动模式",@"混合支持摇杆或相对拖动",@"segment"],@[@"dragLimited",@"拖拽限速",@"开启：遵循原版速度；关闭：立即跟随拖动",@"switch"],@[@"hidden",@"No Button",@"隐藏 X / S / Z 与摇杆，保留设置和暂停",@"switch"],@[@"layout",@"自由调整按键与摇杆位置",@"横屏、竖屏分别保存",@"action"],@[@"toggleFire",@"Z 点击保持射击",@"再点一次停止；菜单仍按住确认",@"switch"],@[@"toggleSlow",@"S 点击保持低速",@"再点一次恢复高速",@"switch"],@[@"autoFire",@"自动射击",@"进入战斗后自动按住 Z",@"switch"],@[@"autoSlow",@"自动低速",@"进入战斗后自动按住 S",@"switch"],@[@"dragFire",@"拖拽移动时自动射击",@"松手后恢复原有射击状态",@"switch"]],
+ @[@[@"movement",@"移动模式",@"混合支持摇杆或相对拖动",@"segment"],@[@"dragLimited",@"拖拽限速",@"开启：遵循原版速度；关闭：立即跟随拖动",@"switch"],@[@"hidden",@"No Button",@"隐藏 X / S / Z 与摇杆，保留设置和暂停",@"switch"],@[@"layout",@"自由调整按键与摇杆位置",@"横屏、竖屏分别保存",@"action"],@[@"toggleFire",@"Z 点击保持射击",@"再点一次停止；菜单仍按住确认",@"switch"],@[@"toggleSlow",@"S 点击保持低速",@"再点一次恢复高速",@"switch"],@[@"autoFire",@"自动射击",@"进入战斗后自动按住 Z",@"switch"],@[@"autoSlow",@"自动低速",@"进入战斗后自动按住 S",@"switch"],@[@"autoBomb",@"自动 Bomb",@"真正中弹前自动释放，按原作消耗火力；不足则正常受击",@"switch"],@[@"dragFire",@"拖拽移动时自动射击",@"松手后恢复原有射击状态",@"switch"]],
  @[@[@"opacity",@"按键透明度",@"",@"slider"],@[@"size",@"按键与摇杆大小",@"",@"slider"],@[@"sensitivity",@"拖动灵敏度",@"",@"slider"],@[@"deadZone",@"摇杆中心死区（0–40%）",@"",@"slider"],@[@"leftHand",@"左手按键布局",@"默认位置左右互换，自定义位置优先",@"switch"],@[@"haptics",@"按键触感反馈",@"在支持触感反馈的设备上生效",@"switch"]],
  @[@[@"fps",@"显示帧率",@"",@"segment"],@[@"smooth",@"平滑缩放",@"关闭时保留清晰的像素边缘",@"switch"],@[@"performance",@"显示性能信息",@"显示回调频率与逻辑更新频率",@"switch"],],
  @[@[@"twoFinger",@"双指低速",@"在游戏区域按住两指时低速移动",@"switch"],@[@"doubleTap",@"双击 Bomb",@"战斗中在同一位置快速双击",@"switch"],@[@"export",@"导出诊断日志",@"包含本次与上次运行记录",@"action"],@[@"reset",@"恢复默认设置与按键布局",@"保留游戏成绩及解锁内容",@"action"],],
@@ -542,6 +544,63 @@ NSIndexPath* featureRow(TH11SettingsController* settings,NSString* key){
     for(NSUInteger s=0;s<settings.rows.count;++s)for(NSUInteger r=0;r<[settings.rows[s] count];++r)
         if([settings.rows[s][r][0] isEqual:key])return [NSIndexPath indexPathForRow:r inSection:s];return nil;
 }
+void typeUnlockCode(TH11SettingsController* settings,UIAlertController* prompt,unsigned step,std::uint64_t frozenCallbacks){
+    UITextField* field=prompt.textFields.firstObject;
+    if(settings.presentedViewController!=prompt||!field.isFirstResponder||!sdl_loop_is_paused()||observedCallbacks!=frozenCallbacks){
+        smokeFail([NSString stringWithFormat:@"keyboard lost field focus/pause at step %u",step]);return;
+    }
+    if(step<5){[field insertText:[@"wrong" substringWithRange:NSMakeRange(step,1)]];}
+    else if(step==5){
+        if(![field.text isEqual:@"wrong"]||[settings confirmUnlockPrompt:prompt]!=0){smokeFail(@"keyboard wrong code altered unlock");return;}
+        [field deleteBackward];
+    }else if(step==6){
+        if(![field.text isEqual:@"wron"]){smokeFail(@"keyboard delete failed");return;}
+        [field selectAll:nil];[field insertText:@"ymgjdsh"];
+    }else{
+        if(![field.text isEqual:@"ymgjdsh"]||[settings confirmUnlockPrompt:prompt]!=1||(sdl_diagnostic_features()&8)==0){smokeFail(@"keyboard paste/confirmation failed");return;}
+        touhou::ios::diagnostic(@"KEYBOARD_UI input PASS typed=5 delete=1 paste=7 focusRetained=1 fullUnlockSaved=1 callbacksFrozen=1");touhou::ios::diagnosticsFlush();
+        smokeAfter(3,^{[prompt dismissViewControllerAnimated:YES completion:^{[settings closeSettings];
+            smokeAfter(2,^{
+                if(settings.didFinish&&!sdl_loop_is_paused()&&observedCallbacks>frozenCallbacks){touhou::ios::diagnostic(@"KEYBOARD_UI PASS typing/delete/paste/confirm and settings pause/resume");touhou::ios::diagnosticsFlush();}
+                else smokeFail(@"keyboard settings resume failed");
+            });
+        }];});return;
+    }
+    // UIKit posts this notification for typing, paste and composition. Include
+    // it explicitly when a simulator's programmatic insertText omits it.
+    [NSNotificationCenter.defaultCenter postNotificationName:UITextFieldTextDidChangeNotification object:field];
+    touhou::ios::diagnostic(@"KEYBOARD_UI change step=%u length=%lu focus=%d",step,(unsigned long)field.text.length,field.isFirstResponder);touhou::ios::diagnosticsFlush();
+    smokeAfter(.4,^{typeUnlockCode(settings,prompt,step+1,frozenCallbacks);});
+}
+void invokeKeyboardSmoke(unsigned attempts){
+    UIButton* button=nil;for(UIWindow* w in UIApplication.sharedApplication.windows)if(!w.hidden){button=featureButton(w,@"th11.settings");if(button)break;}
+    if(!button){if(attempts<30){smokeAfter(1,^{invokeKeyboardSmoke(attempts+1);});return;}smokeFail(@"keyboard settings button missing");return;}
+    UIViewController* presenter=button.window.rootViewController;
+    [button sendActionsForControlEvents:UIControlEventTouchDown];
+    smokeAfter(1,^{
+        TH11SettingsController* settings=(TH11SettingsController*)((UINavigationController*)presenter.presentedViewController).topViewController;
+        if(![settings isKindOfClass:TH11SettingsController.class]||!sdl_loop_is_paused()){smokeFail(@"keyboard settings unavailable");return;}
+        NSIndexPath* bombRow=featureRow(settings,@"autoBomb");
+        if(!bombRow){smokeFail(@"automatic Bomb setting missing");return;}
+        [settings.tableView scrollToRowAtIndexPath:bombRow atScrollPosition:UITableViewScrollPositionMiddle animated:NO];[settings.tableView layoutIfNeeded];
+        UISwitch* toggle=(UISwitch*)[settings.tableView cellForRowAtIndexPath:bombRow].accessoryView;
+        if(![toggle isKindOfClass:UISwitch.class]){smokeFail(@"automatic Bomb switch missing");return;}
+        for(NSNumber* value in @[@YES,@NO,@YES]){
+            toggle.on=value.boolValue;[toggle sendActionsForControlEvents:UIControlEventValueChanged];
+            if(touhou::sdl::nativeOptions.autoBomb!=value.boolValue||bool(touhou::ios::preference(@"autoBomb"))!=value.boolValue){smokeFail(@"automatic Bomb preference/engine mismatch");return;}
+        }
+        touhou::ios::diagnostic(@"AUTOBOMB_UI PASS switch on/off reached preferences and engine; saved=1");
+        NSIndexPath* row=featureRow(settings,@"unlock");[settings.tableView scrollToRowAtIndexPath:row atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+        [settings tableView:settings.tableView didSelectRowAtIndexPath:row];
+        smokeAfter(1,^{
+            UIAlertController* prompt=(UIAlertController*)settings.presentedViewController;
+            if(![prompt isKindOfClass:UIAlertController.class]||prompt.textFields.count!=1){smokeFail(@"keyboard prompt missing");return;}
+            [prompt.textFields.firstObject becomeFirstResponder];
+            smokeAfter(.5,^{typeUnlockCode(settings,prompt,0,observedCallbacks);});
+        });
+    });
+}
+void startKeyboardSmoke(){smokeAfter(4,^{invokeKeyboardSmoke(0);});}
 void invokeFeaturesSmoke(unsigned attempt){
     UIButton* button=nil;for(UIWindow* w in UIApplication.sharedApplication.windows)if(!w.hidden){button=featureButton(w,@"th11.settings");if(button)break;}
     if(!button||sdl_game_status()[0]!=7){if(attempt<40){smokeAfter(2,^{invokeFeaturesSmoke(attempt+1);});return;}smokeFail(@"features battle unavailable");return;}

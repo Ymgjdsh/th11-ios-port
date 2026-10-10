@@ -38,6 +38,8 @@ public:
     PlayerMotion motion;ShotManager shots;PlayerFrameState state;
     PlayerFrameInput input;PlayerSpellState spell;i32 last_error=0;
     bool initialize();bool update();bool hit();bool die();bool draw(AnmRenderer&);
+    // Caller checks availability; manual and automatic activation share cost.
+    bool activate_bomb();
     bool start_stage();
     bool restore_replay_position(const ReplayStageState&);
     PlayerCollision collision()const noexcept;

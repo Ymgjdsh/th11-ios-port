@@ -2,7 +2,7 @@ Original game and assets: Team Shanghai Alice / ZUN.
 Launcher: YomotsuHisami/eagler-touhou, GPL-3.0-or-later, adapted from the local final TH08/TH10/TH09 launcher. See LICENSE-launcher.txt.
 SDL3: zlib. Emscripten: MIT / University of Illinois-NCSA.
 
-Native iOS source export (b2):
+Native iOS source export (b3):
 - Based on YomotsuHisami/th11, reference commit
   8255f484d0c1cff0ef9af9f19bb159328adda69f:
   https://github.com/YomotsuHisami/th11
@@ -11,6 +11,9 @@ Native iOS source export (b2):
   LICENSE-launcher.txt does not assert a blanket license over the game
   reconstruction, native additions, original game or original assets.
 - SDL 3.4.2: zlib; ios/licenses/SDL.txt.
+  The native build applies a local UIKit text-field notification guard using
+  ios/tools/patch_sdl_uikit.py. The guard prevents native forms from being
+  handled by SDL's hidden text field; SDL's original notices are retained.
 - SDL_ttf 3.2.2 / FreeType: retained dependency toolchain notices in
   ios/licenses/SDL_ttf.txt and ios/licenses/FreeType.txt. The native target
   links SDL3 and uses offline raster fonts, not SDL_ttf.

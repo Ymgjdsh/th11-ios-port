@@ -165,13 +165,84 @@ static void feature_checks(GameResources& source,ClockGraphics& graphics){
     assert(!replay->developer_available()&&!replay->developer_action(0));
     std::puts("PASS developer: replay/demo excluded");
 }
+static void auto_bomb_checks(GameResources& source,ClockGraphics& graphics){
+    auto create=[&](int shot){
+        auto game=std::make_unique<GameSession>();assert(game->begin(source,1,shot/3,shot%3,1));
+        for(int i=0;i<45;++i)assert(game->update({}));
+        auto& b=*game->battle;auto& p=*b.player;
+        b.auto_bomb=true;p.state.life_state=1;p.state.invincibility.set(0,&game->animations.rate);
+        p.state.state_timer.set(40,&game->animations.rate);b.events.clear();
+        game->economy.power=game->economy.max_power;return game;
+    };
+    auto collide=[](GameBattle& b,int shape){
+        const auto pos=b.player->motion.state.position;
+        if(shape==2)return b.collision({pos.x-10,pos.y,0},0,8,20);
+        if(shape==3){EnemyState enemy{};enemy.current.position=pos;i32 result=-2;assert(b.player_collision(enemy,8,result));return result;}
+        BulletState bullet{};bullet.position=pos;bullet.hitbox={8,8};if(shape==1)bullet.flags=0x10;
+        return b.collision(bullet);
+    };
+    for(int shot=0;shot<6;++shot)for(int shape=0;shape<4;++shape){
+        auto game=create(shot);auto& b=*game->battle;auto& p=*b.player;auto& e=game->economy;
+        const int power=e.power,lives=e.lives;
+        assert(collide(b,shape)==i32(CollisionKind::Hit));
+        assert(p.state.life_state==1&&b.bomb->state.active&&e.power==power-e.power_step&&e.lives==lives);
+        // No miss feedback, no second charge from another collision this tick.
+        for(auto* vm=game->animations.layer_first(0);vm;vm=vm->draw_next)
+            assert(vm->resource!=&game->resources.core.bullet||(vm->script_index!=76&&vm->script_index!=77));
+        for(const auto& event:b.events)assert(event.kind!=BattleEventKind::Death);
+        assert(collide(b,shape)>=0&&p.state.life_state==1&&e.power==power-e.power_step);
+        assert(game->update({}));
+        assert(p.state.life_state==1&&e.lives==lives&&e.power==power-e.power_step);
+        assert(b.bomb_count()==1); // Includes Nitori consuming the triggering hit.
+        AnmRenderer renderer(graphics);renderer.viewport={0,0,640,480,0,1};assert(game->draw(renderer));renderer.flush();
+        std::printf("PASS auto Bomb shot %d collision %d: before miss effects, ordinary cost, single charge, native Bomb draw\n",shot,shape);
+    }
+    for(int kind=0;kind<7;++kind){
+        auto game=create(0);auto& b=*game->battle;auto& p=*b.player;auto& e=game->economy;
+        switch(kind){
+        case 0:b.auto_bomb=false;break;
+        case 1:e.power=e.power_step-1;break;
+        case 2:p.state.invincibility.set(20,&game->animations.rate);break;
+        case 3:b.replaying=true;break;
+        case 4:b.demo=true;break;
+        case 5:b.stage_active=false;break;
+        case 6:b.developer_invincible=true;break;
+        }
+        const int power=e.power;assert(collide(b,0)>=0);
+        assert(!b.bomb->state.active&&e.power==power);
+        assert(p.state.life_state==(kind==2||kind==6?1:4));
+    }
+    {
+        auto game=create(0);auto& b=*game->battle;auto& p=*b.player;
+        BulletState bullet{};bullet.position=p.motion.state.position;bullet.position.x+=20;bullet.hitbox={2,2};
+        const int power=game->economy.power;assert(b.collision(bullet)==i32(CollisionKind::Graze));
+        assert(p.state.life_state==1&&!b.bomb->state.active&&game->economy.power==power);
+        assert(b.warning_collision({p.motion.state.position.x-10,p.motion.state.position.y,0},0,8,20)==i32(CollisionKind::Hit));
+        assert(!b.bomb->state.active&&game->economy.power==power);
+        assert(game->pause());const auto frame=game->state.frame;assert(game->update({})&&game->state.frame==frame);assert(!b.bomb->state.active);
+    }
+    {
+        auto game=create(0);auto& b=*game->battle;const int power=game->economy.power;
+        assert(b.start_dialogue(0));assert(b.dialogue&&b.dialogue->active);
+        assert(collide(b,0)>=0&&!b.bomb->state.active&&game->economy.power==power);
+    }
+    // Enabled assistance never replaces an already active ordinary Bomb.
+    {
+        auto game=create(3);auto& b=*game->battle;auto& p=*b.player;
+        assert(p.activate_bomb());const int power=game->economy.power;
+        assert(collide(b,0)>=0&&p.state.life_state==1&&game->economy.power==power);
+    }
+    std::puts("PASS auto Bomb exclusions: off, insufficient power, invincibility, replay/demo, inactive stage, developer immunity, graze, laser warning, pause, dialogue, active Bomb");
+}
 int main(int argc,char** argv){
     std::setvbuf(stdout,nullptr,_IOLBF,0);
     if(argc!=2&&argc!=3)return 2;
     std::ifstream file(argv[1],std::ios::binary);std::vector<u8> bytes((std::istreambuf_iterator<char>(file)),{});
     auto source=std::make_unique<GameResources>();assert(source->open_archive(bytes.data(),u32(bytes.size())));
     ClockGraphics graphics;unsigned long ticks=0;
+    if(argc==3&&std::string(argv[2])=="--auto-bomb-only"){auto_bomb_checks(*source,graphics);return 0;}
     if(argc==3&&std::string(argv[2])=="--features-only"){feature_checks(*source,graphics);return 0;}
+    if(argc==2)auto_bomb_checks(*source,graphics);
     menu_checks(*source,graphics);
     if(argc==3){assert(std::string(argv[2])=="--menus-only");return 0;}
     for(unsigned demo=0;demo<4;demo++){

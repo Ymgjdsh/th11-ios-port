@@ -9,6 +9,7 @@ case "$SDK" in
   *) echo 'Unsupported Apple SDK' >&2; exit 2;;
 esac
 BUILD=${TH11_BUILD_DIR:-$ROOT/.local/build-$SDK}
+python3 "$ROOT/ios/tools/patch_sdl_uikit.py" "${TH11_DEPENDENCIES:-$ROOT/.local/dependencies}/SDL"
 CONFIGURE_ARGS=(-S "$ROOT/ios" -B "$BUILD" -G Xcode)
 if [ -n "${TH11_PROBE_CACHE:-}" ]; then CONFIGURE_ARGS+=(-C "$TH11_PROBE_CACHE"); fi
 cmake "${CONFIGURE_ARGS[@]}" \

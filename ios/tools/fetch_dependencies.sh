@@ -20,3 +20,4 @@ grep -Eq '^#define SDL_MAJOR_VERSION +3$' "$DEST/SDL/include/SDL3/SDL_version.h"
 grep -Eq '^#define SDL_MINOR_VERSION +4$' "$DEST/SDL/include/SDL3/SDL_version.h"
 grep -Eq '^#define SDL_MICRO_VERSION +2$' "$DEST/SDL/include/SDL3/SDL_version.h"
 echo 'Dependencies ready: SDL 3.4.2, SDL_ttf 3.2.2, FreeType 2.13.2 (pinned SDL fork).'
+python3 "$ROOT/ios/tools/patch_sdl_uikit.py" "$DEST/SDL"

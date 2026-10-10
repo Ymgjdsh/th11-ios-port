@@ -86,6 +86,7 @@ public:
     u32 frame=0;
     bool initialized=false,player_live=true,game_over_requested=false;
     bool developer_invincible=false;
+    bool auto_bomb=false;
     i32 practice_high=0;
     bool replaying=false,demo=false;
     ReplayStageState replay_entry;

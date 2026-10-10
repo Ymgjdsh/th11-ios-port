@@ -312,6 +312,7 @@ bool sample_and_tick(){
     if(auto* b=app.session.battle.get()){b->player_input.movement.touch_mode=sample.motion;b->player_input.movement.touch_x=sample.x;b->player_input.movement.touch_y=sample.y;}
 #if defined(TH11_IOS)
     const auto& options=touhou::sdl::nativeOptions;
+    if(auto* battle=app.session.battle.get())battle->auto_bomb=options.autoBomb;
     if(touch_state().context==1){if(options.autoFire||(options.dragFire&&sample.motion))keys[90]=true;if(options.autoSlow)keys[16]=true;}
 #endif
     const u32 raw=sample_controller()|keyboard_keys(keys);

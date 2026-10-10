@@ -333,6 +333,22 @@ i32 GameBattle::apply_collision(PlayerCollisionResult result) {
     if(result.trigger_hit&&!developer_invincible){
         if(!player){last_error=-602;return -2;}
         player->spell={spell_flags,spell_elapsed,spell_bonus};
+        // Intercept a real hit before PlayerFrame::hit creates death ANMs or
+        // miss audio. Graze and invincibility never reach this branch.
+        if(auto_bomb&&!replaying&&!demo&&player_live&&stage_active&&
+           player->state.life_state==1&&!(dialogue&&dialogue->active)&&
+           bomb&&bomb->supported()&&!bomb->state.active&&
+           economy.power_step>0&&economy.power>=economy.power_step){
+            if(!player->activate_bomb()){last_error=-608;return -2;}
+            // The collision happens after this frame's Bomb callback. Supply
+            // its normal protection now so other collisions cannot hit again.
+            player->state.invincibility.set(std::max(40,player->state.invincibility.current),&animations.rate);
+            if(bomb->selection==5)player->motion.state.flags&=~4u;
+            // Nitori's shield absorbs this hit on its next ordinary callback,
+            // retaining the original shield count, spell penalty and effects.
+            spell_flags=player->spell.flags;spell_bonus=player->spell.bonus;
+            return i32(result.kind);
+        }
         if(!player->hit()){last_error=-602;return -2;}
         spell_flags=player->spell.flags;spell_bonus=player->spell.bonus;
     }

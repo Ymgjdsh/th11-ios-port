@@ -26,7 +26,7 @@ static void showSettings(UIButton* button);
 static void showDeveloper();
 static void controls(){
     const bool autoFire=touhou::ios::preference(@"autoFire"),autoSlow=touhou::ios::preference(@"autoSlow"),dragFire=touhou::ios::preference(@"dragFire");
-    sdl_native_options(autoFire,autoSlow,dragFire,0,0);
+    sdl_native_options(autoFire,autoSlow,dragFire,touhou::ios::preference(@"autoBomb"),0);
     sdl_touch_options(1,!touhou::ios::preference(@"dragLimited"),float(touhou::ios::preference(@"sensitivity")));
     sdl_touch_gestures(touhou::ios::preference(@"twoFinger"),touhou::ios::preference(@"doubleTap"));
     if(!stickMode)sdl_touch_mode((uint32_t)touhou::ios::preference(@"movement"));

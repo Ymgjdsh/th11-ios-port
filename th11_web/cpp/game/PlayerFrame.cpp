@@ -69,9 +69,15 @@ bool PlayerFrame::die(){
     if(!input.replay&&!world.record_death())return false;
     fail_spell();economy.add_rank(-1024);return true;
 }
+bool PlayerFrame::activate_bomb(){
+    if(!world.start_bomb())return false;
+    input.special_active=true;
+    economy.power=wrapping_sub(economy.power,economy.power_step);
+    return rebuild_options();
+}
 bool PlayerFrame::active_frame(){
     if(!input.movement.bomb&&input.special_available&&!input.special_active&&economy.power_step&&economy.power/economy.power_step&&(input.movement.held&2)){
-        if(!world.start_bomb())return false;input.special_active=true;economy.power=wrapping_sub(economy.power,economy.power_step);if(!rebuild_options())return false;
+        if(!activate_bomb())return false;
     }
     if(state.state_timer.current<30&&!cancel_all(true))return false;
     motion.state.transition_timer=state.transition_timer.current;return motion.update(input.movement);
@@ -114,7 +120,7 @@ bool PlayerFrame::update(){
         economy.communication=0;
         if(state.state_timer.current>7){if(!die()||!world.enemy_death()||!death_frame())return false;}
         else if(input.special_available&&!input.special_active&&economy.power_step&&economy.power/economy.power_step&&(input.movement.held&2)){
-            state.state_timer.set(60,&animations.rate);if(!world.start_bomb())return false;input.special_active=true;economy.power=wrapping_sub(economy.power,economy.power_step);if(!rebuild_options())return false;state.life_state=1;
+            state.state_timer.set(60,&animations.rate);if(!activate_bomb())return false;state.life_state=1;
         }break;
     default:break;
     }
